@@ -1,16 +1,32 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
+
 import "../../../Controls"
 
+/**
+ * Stellt einen Sprite-Ausschnitt innerhalb der Rasteransicht dar.
+ *
+ * Das Element zeigt den zugehörigen Bildbereich des Sprite-Sheets
+ * und hebt ihn hervor, wenn er aktuell ausgewählt ist.
+ */
 Item {
     id: spriteGridDelegate
     width: spriteGridView.cellWidth
     height: spriteGridView.cellHeight
-    
+
+    /**
+     * Enthält die Positions- und Größenangaben des dargestellten Sprites.
+     */
     property var sprite: index >= 0 && index < spriteView.model.length ? spriteView.model[index] : null
+
+    /**
+     * Gibt an, ob dieses Sprite aktuell ausgewählt ist.
+     */
     property bool selected: spriteGridView.validIndex === index
-    
+
+    /**
+     * Wählt das Sprite aus und übergibt den Tastaturfokus an die Einzelansicht.
+     */
     MouseArea {
         id: area
         anchors.fill: parent
@@ -21,22 +37,38 @@ Item {
             spriteSingleEdit.forceActiveFocus();
         }
     }
-    
+
+    /**
+     * Begrenzt die Darstellung auf den berechneten Bildbereich des Sprites.
+     */
     Item {
         id: spriteClip
         clip: true
         anchors.fill: parent
         anchors.margins: 2
-        
+
+        /**
+         * Zentriert den Sprite-Ausschnitt horizontal innerhalb des Rasterelements.
+         */
         property real offsetX: (width - appSettings.spriteWidth * spriteGridView.__sc) / 2
+
+        /**
+         * Zentriert den Sprite-Ausschnitt vertikal innerhalb des Rasterelements.
+         */
         property real offsetY: (height - appSettings.spriteHeight * spriteGridView.__sc) / 2
-        
+
+        /**
+         * Zeigt bei Bedarf einen transparenten Hintergrund hinter dem Sprite an.
+         */
         MaterialTransparentBackground {
             anchors.margins: 1
             radius: Theme.controlRadius
             opacity: appSettings.showTransparentBackground ? 1 : 0
         }
-        
+
+        /**
+         * Verschiebt das Sprite-Sheet so, dass nur der zugehörige Bildausschnitt sichtbar ist.
+         */
         Image {
             source: appSettings.lastSpriteSheet
             asynchronous: true
@@ -46,10 +78,11 @@ Item {
             width: sourceSize.width * spriteGridView.__sc
             height: sourceSize.height * spriteGridView.__sc
             visible: spriteGridDelegate.sprite !== null
-            
-            
         }
-        
+
+        /**
+         * Hebt das aktuell ausgewählte Sprite farblich hervor.
+         */
         Rectangle {
             anchors.fill: parent
             radius: Theme.controlRadius

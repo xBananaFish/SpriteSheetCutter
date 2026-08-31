@@ -1,7 +1,13 @@
 import QtQuick
 import QtQuick.Controls
+
 import "../../Controls"
 
+/**
+ * Stellt den ein- und ausblendbaren Bereich für die Sprite-Auswahl und Einzelbearbeitung bereit.
+ *
+ * Die Sichtbarkeit wird über die gespeicherte Einstellung für die Einzelansicht gesteuert.
+ */
 Item {
     id: spriteCollection
     height: 1000
@@ -10,6 +16,9 @@ Item {
 
     visible: appSettings.showSingleEdit
 
+    /**
+     * Füllt den verfügbaren Bereich mit der Sprite-Auswahl und Einzelvorschau.
+     */
     SpriteCollectionPreview {
         id: spriteCollectionPreview
         anchors.bottom: parent.bottom
@@ -18,23 +27,3 @@ Item {
         anchors.top: parent.top
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

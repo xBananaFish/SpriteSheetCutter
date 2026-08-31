@@ -1,14 +1,23 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+
 import "../Controls"
 
-
+/**
+ * Erfasst die grundlegenden Einstellungen für das geladene Sprite-Sheet.
+ *
+ * Dazu gehören die Bezeichnungen für den Export, die Anzahl der Reihen
+ * und Spalten, die Rasterposition sowie die Vergrößerung der Ansicht.
+ */
 MaterialPane {
     id: spriteSheetSetup
     width: 908
     Material.elevation: 4
 
+    /**
+     * Zeigt die Bereichsüberschrift und die Aktion zum Laden eines Sprite-Sheets an.
+     */
     RowLayout {
         Layout.alignment: Qt.AlignTop
         MaterialLabel {
@@ -19,13 +28,20 @@ MaterialPane {
             font.bold: true
             font.capitalization: "AllUppercase"
         }
+
+        /**
+         * Öffnet den Dateidialog zur Auswahl eines Sprite-Sheets.
+         */
         MaterialFlatButton {
             icon.source: Icons.file_open
             toolTipText: "Sheet laden"
             onClicked: { spriteDialog.open() }
         }
-    }    
+    }
 
+    /**
+     * Ordnet die Einstellungen abhängig von der verfügbaren Breite automatisch an.
+     */
     FlexboxLayout {
         Layout.topMargin: 16
         rowGap: 16
@@ -35,7 +51,10 @@ MaterialPane {
         Layout.alignment: Qt.AlignBottom
         Layout.preferredHeight: childrenRect.height
         alignItems: FlexboxLayout.AlignEnd
-        
+
+        /**
+         * Legt den Basisnamen der exportierten Sprite-Dateien fest.
+         */
         MaterialTextField {
             title: "Name"
             Layout.preferredWidth: parent.width
@@ -44,6 +63,9 @@ MaterialPane {
             onTextEdited: { appSettings.spriteName = text; }
         }
 
+        /**
+         * Legt den optionalen Unterordner für den Sprite-Export fest.
+         */
         MaterialTextField {
             title: "Ordner-Name"
             Layout.preferredWidth: parent.width
@@ -52,9 +74,12 @@ MaterialPane {
             onTextEdited: { appSettings.spriteFolderName = text; }
         }
 
+        /**
+         * Legt die Anzahl der Sprite-Reihen fest.
+         */
         MaterialSpinBox {
             title: "Reihen"
-Layout.fillWidth: false
+            Layout.fillWidth: false
             from : 1
             to: 50
             value: appSettings.rows
@@ -62,6 +87,10 @@ Layout.fillWidth: false
                 appSettings.rows = value;
             }
         }
+
+        /**
+         * Legt die Anzahl der Sprite-Spalten fest.
+         */
         MaterialSpinBox {
             title: "Spalten"
             from : 1
@@ -72,6 +101,9 @@ Layout.fillWidth: false
             }
         }
 
+        /**
+         * Legt den horizontalen Abstand des Rasters zum Bildrand fest.
+         */
         MaterialDoubleSpinBox {
             title: "Offset-X"
             from : 0
@@ -82,6 +114,10 @@ Layout.fillWidth: false
                 appSettings.spriteOffsetX = value;
             }
         }
+
+        /**
+         * Legt den vertikalen Abstand des Rasters zum Bildrand fest.
+         */
         MaterialDoubleSpinBox {
             title: "Offset-Y"
             from : 0
@@ -93,6 +129,9 @@ Layout.fillWidth: false
             }
         }
 
+        /**
+         * Ermöglicht das Vergrößern der Sprite-Sheet-Ansicht und das Zurücksetzen des Zooms.
+         */
         RowLayout {
             spacing: 8
             MaterialSpinBox {

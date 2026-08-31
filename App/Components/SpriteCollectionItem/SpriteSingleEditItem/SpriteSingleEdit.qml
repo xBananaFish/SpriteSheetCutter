@@ -1,53 +1,95 @@
 import QtQuick
-import QtQuick.Layouts
+import QtQuick.Controls
+
 import "../../../Controls"
 
-MaterialFrame {
-    id: spriteSingleEdit
-    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-    Layout.preferredHeight: appSettings.spriteHeight * __spriteScale
-    Layout.preferredWidth: appSettings.spriteWidth * __spriteScale
-    //clip: true
+/**
+ * Stellt einen Sprite-Ausschnitt innerhalb der Rasteransicht dar.
+ *
+ * Das Element zeigt den zugehörigen Bildbereich des Sprite-Sheets
+ * und hebt ihn hervor, wenn er aktuell ausgewählt ist.
+ */
+Item {
+    id: spriteGridDelegate
+    width: spriteGridView.cellWidth
+    height: spriteGridView.cellHeight
 
+    /**
+     * Enthält die Positions- und Größenangaben des dargestellten Sprites.
+     */
+    property var sprite: index >= 0 && index < spriteView.model.length ? spriteView.model[index] : null
 
-    property real __spriteScale: Math.min( parent.width  / appSettings.spriteWidth, parent.height  / appSettings.spriteHeight)
-    property var __sprite: spriteGridView.validIndex >= 0 && spriteGridView.validIndex < spriteView.model.length
-                           ? spriteView.model[spriteGridView.validIndex] : null
+    /**
+     * Gibt an, ob dieses Sprite aktuell ausgewählt ist.
+     */
+    property bool selected: spriteGridView.validIndex === index
 
-    Keys.onPressed: function( ev ) {
-
-        const idx = spriteGridView.validIndex;
-        const stepSize = appSettings.movingStepSize * (ev.modifiers & Qt.ShiftModifier ? 10 : 1); // GEÄNDERT
-
-        if ( idx < 0 )
-            return;
-
-        const sprite = spriteView.model[idx];
-        const spriteX = Math.round(sprite.spriteX / stepSize) * stepSize;
-        const spriteY = Math.round(sprite.spriteY / stepSize) * stepSize;
-
-        switch ( ev.key ) {
-        case Qt.Key_Up: spriteView.setSpritePosition(idx, spriteX, spriteY + stepSize); break;
-        case Qt.Key_Down: spriteView.setSpritePosition(idx, spriteX, Math.max(0, spriteY - stepSize)); break;
-        case Qt.Key_Left: spriteView.setSpritePosition(idx, spriteX + stepSize, spriteY); break;
-        case Qt.Key_Right: spriteView.setSpritePosition(idx, Math.max(0, spriteX - stepSize), spriteY); break;
-        default: return;
+    /**
+     * Wählt das Sprite aus und übergibt den Tastaturfokus an die Einzelansicht.
+     */
+    MouseArea {
+        id: area
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            spriteGridView.select(index);
+            spriteSingleEdit.forceActiveFocus();
         }
-
-        ev.accepted = true;
     }
 
-    MaterialTransparentBackground { radius: 0; opacity: appSettings.showTransparentBackground ? 1 : 0 }
-    SpriteSingleEditPreview { id: spriteSingleEditPreview }
-    SpriteSingleEditFadeCross { }
+    /**
+     * Begrenzt die Darstellung auf den berechneten Bildbereich des Sprites.
+     */
+    Item {
+        id: spriteClip
+        clip: true
+        anchors.fill: parent
+        anchors.margins: 2
+
+        /**
+         * Zentriert den Sprite-Ausschnitt horizontal innerhalb des Rasterelements.
+         */
+        property real offsetX: (width - appSettings.spriteWidth * spriteGridView.__sc) / 2
+
+        /**
+         * Zentriert den Sprite-Ausschnitt vertikal innerhalb des Rasterelements.
+         */
+        property real offsetY: (height - appSettings.spriteHeight * spriteGridView.__sc) / 2
+
+        /**
+         * Zeigt bei Bedarf einen transparenten Hintergrund hinter dem Sprite an.
+         */
+        MaterialTransparentBackground {
+            anchors.margins: 1
+            radius: Theme.controlRadius
+            opacity: appSettings.showTransparentBackground ? 1 : 0
+        }
+
+        /**
+         * Verschiebt das Sprite-Sheet so, dass nur der zugehörige Bildausschnitt sichtbar ist.
+         */
+        Image {
+            source: appSettings.lastSpriteSheet
+            asynchronous: true
+            cache: true
+            x: spriteGridDelegate.sprite ? spriteClip.offsetX - spriteGridDelegate.sprite.spriteX  * spriteGridView.__sc: 0
+            y: spriteGridDelegate.sprite ? spriteClip.offsetY - spriteGridDelegate.sprite.spriteY  * spriteGridView.__sc: 0
+            width: sourceSize.width * spriteGridView.__sc
+            height: sourceSize.height * spriteGridView.__sc
+            visible: spriteGridDelegate.sprite !== null
+        }
+
+        /**
+         * Hebt das aktuell ausgewählte Sprite farblich hervor.
+         */
+        Rectangle {
+            anchors.fill: parent
+            radius: Theme.controlRadius
+            color: ColorPalette.rgba(ColorPalette.accent, 0.25)
+            border.color: ColorPalette.accent
+            border.width: 2
+            opacity: spriteGridDelegate.selected ? 1 : 0
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-

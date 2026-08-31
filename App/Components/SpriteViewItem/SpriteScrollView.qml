@@ -3,14 +3,23 @@ import QtQuick.Controls
 import QtQuick.Shapes
 import "../../Controls"
 
+/**
+ * Stellt das geladene Sprite-Sheet zusammen mit dem berechneten Raster dar.
+ *
+ * Die Ansicht unterstützt Zoomen, Scrollen und das Positionieren des
+ * gesamten Rasters per Mausklick oder Drag-and-drop.
+ */
 MaterialScrollView {
     id: spriteScrollView
     anchors.fill: parent
     anchors.margins: 8
-    
+
     contentHeight: spriteContent.height * appSettings.zoom
     contentWidth: spriteContent.width * appSettings.zoom
-    
+
+    /**
+     * Verändert den Zoom bei gedrückter Strg-Taste innerhalb der festgelegten Grenzen.
+     */
     WheelHandler {
         acceptedModifiers: Qt.ControlModifier
         onWheel: function( ev ) {
@@ -19,25 +28,37 @@ MaterialScrollView {
             appSettings.zoom = Math.max(appSettings.minimumZoom, Math.min(appSettings.maximumZoom, zoom))
         }
     }
-    
+
+    /**
+     * Fasst das Sprite-Sheet und das darüberliegende Raster zu einem skalierbaren Inhalt zusammen.
+     */
     Item {
         id: spriteContent
         width: spriteSheetImage.width
         height: spriteSheetImage.height
         scale: appSettings.zoom
         transformOrigin: Item.TopLeft
-        
+
+        /**
+         * Zeigt das aktuell ausgewählte Sprite-Sheet in seiner ursprünglichen Größe an.
+         */
         Image {
             id: spriteSheetImage
             source: appSettings.lastSpriteSheet
             width: sourceSize.width
             height: sourceSize.height
         }
-        
+
+        /**
+         * Zeichnet das berechnete Sprite-Raster über das geladene Sprite-Sheet.
+         */
         Shape {
             id: spriteSheeGrid
             anchors.fill: spriteSheetImage
-            
+
+            /**
+             * Positioniert den Mittelpunkt des ersten Rasterfelds an der angeklickten Stelle.
+             */
             MouseArea {
                 anchors.fill: parent
                 onPressed: spriteContent.forceActiveFocus()
@@ -47,13 +68,23 @@ MaterialScrollView {
                     appSettings.spriteOffsetY = Math.max(0, mouseY - appSettings.spriteHeight / 2)
                 }
             }
-            
+
+            /**
+             * Verschiebt das gesamte Raster unter Berücksichtigung von Zoom und Schrittweite.
+             */
             DragHandler {
                 target: null
-                
+
+                /**
+                 * Enthält den horizontalen Offset zu Beginn der Verschiebung.
+                 */
                 property real __startX: 0
+
+                /**
+                 * Enthält den vertikalen Offset zu Beginn der Verschiebung.
+                 */
                 property real __startY: 0
-                
+
                 onActiveChanged: {
                     if ( active ) {
 
@@ -71,13 +102,19 @@ MaterialScrollView {
                     appSettings.spriteOffsetY = Math.max(0, snappedY);
                 }
             }
-            
+
+            /**
+             * Legt die Darstellung der Rasterlinien fest.
+             */
             ShapePath {
                 strokeWidth: 2
                 strokeColor: "magenta"
                 fillColor: "transparent"
                 cosmeticStroke: true
-                
+
+                /**
+                 * Erzeugt für jeden Eintrag im Sprite-Modell einen geschlossenen rechteckigen Pfad.
+                 */
                 PathMultiline {
                     paths: spriteView.model.map(function(obj) {
                         return [

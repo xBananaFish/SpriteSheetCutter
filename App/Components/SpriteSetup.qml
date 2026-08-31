@@ -1,9 +1,15 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
+
 import "../Controls"
 
+/**
+ * Erfasst die Größe der einzelnen Sprites und ihre Abstände im Sprite-Sheet.
+ *
+ * Die Werte werden für die Berechnung des Rasters und der auszuschneidenden
+ * Bildbereiche verwendet.
+ */
 MaterialPane {
     id: spriteSetup
     width: 908
@@ -17,12 +23,18 @@ MaterialPane {
         font.capitalization: "AllUppercase"
     }
 
+    /**
+     * Ordnet die Einstellungen abhängig von der verfügbaren Breite automatisch an.
+     */
     Flow {
         Layout.alignment: Qt.AlignBottom
         Layout.topMargin: 16
         spacing: 16
         Layout.fillWidth: true
 
+        /**
+         * Legt die Breite eines einzelnen Sprites fest.
+         */
         MaterialDoubleSpinBox {
             title: "Breite"
             from : 8
@@ -33,6 +45,10 @@ MaterialPane {
                 appSettings.spriteWidth = value;
             }
         }
+
+        /**
+         * Legt die Höhe eines einzelnen Sprites fest.
+         */
         MaterialDoubleSpinBox {
             title: "Höhe"
             from : 8
@@ -44,6 +60,9 @@ MaterialPane {
             }
         }
 
+        /**
+         * Legt den horizontalen Abstand zwischen den Sprites fest.
+         */
         MaterialDoubleSpinBox {
             title: "Abstand-X"
             from : 0
@@ -54,6 +73,10 @@ MaterialPane {
                 appSettings.spriteDistanceX = value;
             }
         }
+
+        /**
+         * Legt den vertikalen Abstand zwischen den Sprites fest.
+         */
         MaterialDoubleSpinBox {
             title: "Abstand-Y"
             from : 0
@@ -64,7 +87,5 @@ MaterialPane {
                 appSettings.spriteDistanceY = value;
             }
         }
-
-        
     }
 }
