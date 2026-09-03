@@ -86,5 +86,7 @@
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>SpriteSheetCutter.qmlproject</file>
+        <file>assets/icons/icon.ico</file>
+        <file>assets/icons/icon.png</file>
     </qresource>
 </RCC>

@@ -3,10 +3,12 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QIcon>
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+    app.setWindowIcon(QIcon(":/assets/icons/icon.ico"));
 
     WindowsWindowFilter windowsWindowFilter;
     app.installNativeEventFilter(&windowsWindowFilter);

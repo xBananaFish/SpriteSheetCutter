@@ -1,95 +1,72 @@
 import QtQuick
-import QtQuick.Controls
-
+import QtQuick.Layouts
 import "../../../Controls"
 
 /**
- * Stellt einen Sprite-Ausschnitt innerhalb der Rasteransicht dar.
+ * Stellt das ausgewählte Sprite vergrößert zur Einzelbearbeitung dar.
  *
- * Das Element zeigt den zugehörigen Bildbereich des Sprite-Sheets
- * und hebt ihn hervor, wenn er aktuell ausgewählt ist.
+ * Der Bildausschnitt kann per Maus oder Pfeiltasten feinjustiert werden.
+ * Mit gedrückter Umschalttaste wird die eingestellte Schrittweite verzehnfacht.
  */
-Item {
-    id: spriteGridDelegate
-    width: spriteGridView.cellWidth
-    height: spriteGridView.cellHeight
+MaterialFrame {
+    id: spriteSingleEdit
+    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+    Layout.preferredHeight: appSettings.spriteHeight * __spriteScale
+    Layout.preferredWidth: appSettings.spriteWidth * __spriteScale
+    //clip: true
+
 
     /**
-     * Enthält die Positions- und Größenangaben des dargestellten Sprites.
+     * Berechnet den größtmöglichen Skalierungsfaktor für den verfügbaren Vorschaubereich.
      */
-    property var sprite: index >= 0 && index < spriteView.model.length ? spriteView.model[index] : null
+    property real __spriteScale: Math.min( parent.width  / appSettings.spriteWidth, parent.height  / appSettings.spriteHeight)
 
     /**
-     * Gibt an, ob dieses Sprite aktuell ausgewählt ist.
+     * Enthält die Daten des aktuell in der Rasteransicht ausgewählten Sprites.
      */
-    property bool selected: spriteGridView.validIndex === index
+    property var __sprite: spriteGridView.validIndex >= 0 && spriteGridView.validIndex < spriteView.model.length
+                           ? spriteView.model[spriteGridView.validIndex] : null
 
     /**
-     * Wählt das Sprite aus und übergibt den Tastaturfokus an die Einzelansicht.
+     * Verschiebt den ausgewählten Bildausschnitt mit den Pfeiltasten.
+     *
+     * @param ev Enthält die gedrückte Taste und die aktiven Modifikatortasten.
      */
-    MouseArea {
-        id: area
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            spriteGridView.select(index);
-            spriteSingleEdit.forceActiveFocus();
+    Keys.onPressed: function( ev ) {
+
+        const idx = spriteGridView.validIndex;
+        const stepSize = appSettings.movingStepSize * (ev.modifiers & Qt.ShiftModifier ? 10 : 1); // GEÄNDERT
+
+        if ( idx < 0 )
+            return;
+
+        const sprite = spriteView.model[idx];
+        const spriteX = Math.round(sprite.spriteX / stepSize) * stepSize;
+        const spriteY = Math.round(sprite.spriteY / stepSize) * stepSize;
+
+        switch ( ev.key ) {
+        case Qt.Key_Up: spriteView.setSpritePosition(idx, spriteX, spriteY + stepSize); break;
+        case Qt.Key_Down: spriteView.setSpritePosition(idx, spriteX, Math.max(0, spriteY - stepSize)); break;
+        case Qt.Key_Left: spriteView.setSpritePosition(idx, spriteX + stepSize, spriteY); break;
+        case Qt.Key_Right: spriteView.setSpritePosition(idx, Math.max(0, spriteX - stepSize), spriteY); break;
+        default: return;
         }
+
+        ev.accepted = true;
     }
 
     /**
-     * Begrenzt die Darstellung auf den berechneten Bildbereich des Sprites.
+     * Zeigt bei Bedarf einen transparenten Hintergrund hinter dem Sprite an.
      */
-    Item {
-        id: spriteClip
-        clip: true
-        anchors.fill: parent
-        anchors.margins: 2
+    MaterialTransparentBackground { radius: 0; opacity: appSettings.showTransparentBackground ? 1 : 0 }
 
-        /**
-         * Zentriert den Sprite-Ausschnitt horizontal innerhalb des Rasterelements.
-         */
-        property real offsetX: (width - appSettings.spriteWidth * spriteGridView.__sc) / 2
+    /**
+     * Stellt den ausgewählten Bildausschnitt dar und ermöglicht dessen Verschiebung per Maus.
+     */
+    SpriteSingleEditPreview { id: spriteSingleEditPreview }
 
-        /**
-         * Zentriert den Sprite-Ausschnitt vertikal innerhalb des Rasterelements.
-         */
-        property real offsetY: (height - appSettings.spriteHeight * spriteGridView.__sc) / 2
-
-        /**
-         * Zeigt bei Bedarf einen transparenten Hintergrund hinter dem Sprite an.
-         */
-        MaterialTransparentBackground {
-            anchors.margins: 1
-            radius: Theme.controlRadius
-            opacity: appSettings.showTransparentBackground ? 1 : 0
-        }
-
-        /**
-         * Verschiebt das Sprite-Sheet so, dass nur der zugehörige Bildausschnitt sichtbar ist.
-         */
-        Image {
-            source: appSettings.lastSpriteSheet
-            asynchronous: true
-            cache: true
-            x: spriteGridDelegate.sprite ? spriteClip.offsetX - spriteGridDelegate.sprite.spriteX  * spriteGridView.__sc: 0
-            y: spriteGridDelegate.sprite ? spriteClip.offsetY - spriteGridDelegate.sprite.spriteY  * spriteGridView.__sc: 0
-            width: sourceSize.width * spriteGridView.__sc
-            height: sourceSize.height * spriteGridView.__sc
-            visible: spriteGridDelegate.sprite !== null
-        }
-
-        /**
-         * Hebt das aktuell ausgewählte Sprite farblich hervor.
-         */
-        Rectangle {
-            anchors.fill: parent
-            radius: Theme.controlRadius
-            color: ColorPalette.rgba(ColorPalette.accent, 0.25)
-            border.color: ColorPalette.accent
-            border.width: 2
-            opacity: spriteGridDelegate.selected ? 1 : 0
-        }
-    }
+    /**
+     * Blendet bei Bedarf ein Fadenkreuz über der Einzelansicht ein.
+     */
+    SpriteSingleEditFadeCross { }
 }
